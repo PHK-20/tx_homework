@@ -21,7 +21,7 @@ func init() {
 		log.Fatalln(err.Error())
 	}
 	db_user := db_cfg["db_user"] + ":" + db_cfg["db_pw"]
-	db_addr := db_cfg["db_host"] + ":" + db_cfg["port"]
+	db_addr := db_cfg["db_host"] + ":" + db_cfg["db_port"]
 	db_name := db_cfg["db_name"]
 	Db, err = sqlx.Open("mysql", db_user+"@tcp("+db_addr+")/"+db_name)
 	if err != nil {
