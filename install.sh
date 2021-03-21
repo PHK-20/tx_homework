@@ -1,9 +1,9 @@
 #!/bin/bash
 # mysql conf
-host="127.0.0.1"
-port="3306"
 db_user="root"
 db_pw="123456"
+host="127.0.0.1"
+port="3306"
 db_name="go_demo"
 
 raw_sql="

@@ -21,9 +21,9 @@ func init() {
 		log.Fatalln(err.Error())
 	}
 	db_user := db_cfg["db_user"] + ":" + db_cfg["db_pw"]
+	db_addr := db_cfg["db_host"] + ":" + db_cfg["port"]
 	db_name := db_cfg["db_name"]
-
-	Db, err = sqlx.Open("mysql", db_user+"@tcp(127.0.0.1:3306)/"+db_name)
+	Db, err = sqlx.Open("mysql", db_user+"@tcp("+db_addr+")/"+db_name)
 	if err != nil {
 		log.Fatalln("open mysql failed,", err)
 	}

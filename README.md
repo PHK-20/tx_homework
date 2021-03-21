@@ -18,16 +18,26 @@ db/conf.ini
 [mysql]
 db_user=root
 db_pw=123456
-db_name=go_demo
+db_host=127.0.0.1
+db_port=3306
 ```
 
 install.sh  
 ```shell
 # mysql conf
-host="127.0.0.1"
-port="3306"
 db_user="root"
 db_pw="123456"
+host="127.0.0.1"
+port="3306"
+```
+
+* 配置Redis端口和ip
+
+redis/conf.ini
+```ini
+[redis]
+host=127.0.0.1
+port=6379
 ```
 
 * 终端运行intall.sh
@@ -43,6 +53,7 @@ go build
 ```
 
 * 打开浏览器测试web服务  
+
 get请求：localhost:9000/GetUser  
 第一次请求会从mysql读取数据写入redis缓存，输出到终端  
 第二次请求会从redis读出数据，输出到终端  
