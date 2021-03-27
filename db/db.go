@@ -1,7 +1,9 @@
 package db
 
 import (
+	"encoding/json"
 	"errors"
+	"go_redis/redis"
 	"log"
 
 	"github.com/Unknwon/goconfig"
@@ -30,30 +32,83 @@ func init() {
 }
 
 type User struct {
-	User  string `db:"user"`
+	User  string `db:"user"` //primary key
 	Sex   string `db:"sex"`
 	Email string `db:"email"`
 	Age   int    `db:"age"`
 }
 
-func GetUser() ([]User, error) {
+func (item *User) GetUser() ([]User, error) {
 	var users []User
 	err := Db.Select(&users, "select user, sex, email, age from user_info")
 	if err != nil {
-		return nil, errors.New("exec failed, " + err.Error())
+		return nil, errors.New("db exec failed, " + err.Error())
 	}
 	return users, nil
 }
-func AddUser(item *User) (*int64, error) {
+
+func (item *User) Add() (*int64, error) {
+	if len(item.User) == 0 {
+		return nil, errors.New("db insert error: pk user is empty")
+	}
 	r, err := Db.Exec(
 		"insert into user_info(user, sex, email,age) values(?, ?, ?,?)",
 		item.User, item.Sex, item.Email, item.Age)
 	if err != nil {
-		return nil, errors.New("exec failed, " + err.Error())
+		return nil, errors.New("db exec failed, " + err.Error())
 	}
 	id, err := r.LastInsertId()
 	if err != nil {
-		return nil, errors.New("exec failed, " + err.Error())
+		return nil, errors.New("db exec failed, " + err.Error())
 	}
 	return &id, nil
+}
+
+func (item *User) Update() (*int64, error) {
+	if len(item.User) == 0 {
+		return nil, errors.New("db update error: pk user is empty")
+	}
+	res, err := Db.Exec(
+		"update user_info set sex=?, email=?, age=? where user=?",
+		item.Sex, item.Email, item.Age, item.User)
+	if err != nil {
+		return nil, errors.New("db exec failed, " + err.Error())
+	}
+	row, err := res.RowsAffected()
+	if err != nil {
+		return nil, errors.New("db exec failed, " + err.Error())
+	}
+	return &row, nil
+}
+
+func (item *User) Delete() (*int64, error) {
+	if len(item.User) == 0 {
+		return nil, errors.New("db del error: pk user is empty")
+	}
+	res, err := Db.Exec("delete from user_info where user=?", item.User)
+	if err != nil {
+		return nil, errors.New("db exec failed, " + err.Error())
+	}
+	row, err := res.RowsAffected()
+	if err != nil {
+		return nil, errors.New("db exec failed, " + err.Error())
+	}
+	return &row, nil
+}
+
+func (item *User) UpdateRedis() (*string, error) {
+	users, err := item.GetUser()
+	if err != nil {
+		return nil, err
+	}
+	user_str, err := json.Marshal(users)
+	if err != nil {
+		return nil, err
+	}
+	ex_time := "15"
+	reply, err := redis.SetKV("user", string(user_str), &ex_time)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
 }
